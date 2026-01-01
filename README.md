@@ -2,7 +2,6 @@
 
 A terminal-based environment variable manager built with Go and the Charm libraries.
 
-![kole](https://img.shields.io/github/release/EdwardJoke/kole.svg)
 ![Go Version](https://img.shields.io/badge/Go-1.25.5-blue)
 ![License](https://img.shields.io/github/license/EdwardJoke/kole)
 
@@ -14,6 +13,7 @@ A terminal-based environment variable manager built with Go and the Charm librar
 - **Edit Environment Variables** - Modify existing environment variable values
 - **Delete Environment Variables** - Remove environment variables from your session
 - **Search Environment Variables** - Filter environment variables by name or value
+- **Format Shell Config** - Organize and format .bashrc and .zshrc files
 
 ## Installation
 

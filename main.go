@@ -85,6 +85,7 @@ func showMainMenu() string {
 					huh.NewOption("Edit Environment Variable", "edit_var"),
 					huh.NewOption("Delete Environment Variable", "delete_var"),
 					huh.NewOption("Search Environment Variables", "search_var"),
+					huh.NewOption("Format Shell Config (.bashrc/.zshrc)", "format_shell"),
 					huh.NewOption("Exit", "exit"),
 				).
 				Value(&selectedAction),
@@ -407,6 +408,8 @@ func main() {
 			deleteEnvVar()
 		case "search_var":
 			searchEnvVars()
+		case "format_shell":
+			runFormatter()
 		case "exit":
 			fmt.Println("\nGoodbye! Thanks for using Environment Variable Manager!")
 			return
