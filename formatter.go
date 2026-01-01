@@ -14,16 +14,54 @@ import (
 
 var (
 	formatStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#FAFAFA")).
-			Background(lipgloss.Color("#7D56F4")).
-			PaddingTop(2).
-			PaddingLeft(4).
-			Width(24)
+			Border(lipgloss.RoundedBorder()).
+			BorderForeground(lipgloss.Color("#7D56F4")).
+			Padding(2).
+			Width(100)
 
 	infoStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#28A745")).
 			Padding(1)
+
+	keywordStyle = lipgloss.NewStyle().
+			Bold(true).
+			Foreground(lipgloss.Color("#FF79C6"))
+
+	stringStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#50FA7B"))
+
+	pathStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#8BE9FD"))
+
+	commentStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#6272A4"))
 )
+
+func highlightSyntax(line string) string {
+	keywords := []string{"export", "alias", "function"}
+	for _, kw := range keywords {
+		if strings.HasPrefix(line, kw) {
+			line = keywordStyle.Render(kw) + line[len(kw):]
+			break
+		}
+	}
+
+	if strings.HasPrefix(line, "#") {
+		return commentStyle.Render(line)
+	}
+
+	quotedPattern := regexp.MustCompile(`"[^"]*"|'[^']*'`)
+	line = quotedPattern.ReplaceAllStringFunc(line, func(s string) string {
+		return stringStyle.Render(s)
+	})
+
+	pathPattern := regexp.MustCompile(`\$[A-Z_][A-Z0-9_]*|/[^"'\s]+`)
+	line = pathPattern.ReplaceAllStringFunc(line, func(s string) string {
+		return pathStyle.Render(s)
+	})
+
+	return line
+}
 
 type ShellConfig struct {
 	FilePath  string
@@ -90,48 +128,48 @@ func parseShellConfig(path string) (*ShellConfig, error) {
 func formatShellConfig(config *ShellConfig) string {
 	var lines []string
 
-	lines = append(lines, "# Comments")
+	lines = append(lines, highlightSyntax("# Comments"))
 	for _, comment := range config.Comments {
-		lines = append(lines, comment)
+		lines = append(lines, highlightSyntax(comment))
 	}
 
 	if len(config.Comments) > 0 && (len(config.Exports) > 0 || len(config.Aliases) > 0 || len(config.Functions) > 0) {
 		lines = append(lines, "")
 	}
 
-	lines = append(lines, "# Exports")
+	lines = append(lines, highlightSyntax("# Exports"))
 	sort.Strings(config.Exports)
 	for _, exp := range config.Exports {
-		lines = append(lines, exp)
+		lines = append(lines, highlightSyntax(exp))
 	}
 
 	if len(config.Exports) > 0 && (len(config.Aliases) > 0 || len(config.Functions) > 0) {
 		lines = append(lines, "")
 	}
 
-	lines = append(lines, "# Aliases")
+	lines = append(lines, highlightSyntax("# Aliases"))
 	sort.Strings(config.Aliases)
 	for _, alias := range config.Aliases {
-		lines = append(lines, alias)
+		lines = append(lines, highlightSyntax(alias))
 	}
 
 	if len(config.Aliases) > 0 && len(config.Functions) > 0 {
 		lines = append(lines, "")
 	}
 
-	lines = append(lines, "# Functions")
+	lines = append(lines, highlightSyntax("# Functions"))
 	sort.Strings(config.Functions)
 	for _, fn := range config.Functions {
-		lines = append(lines, fn)
+		lines = append(lines, highlightSyntax(fn))
 	}
 
 	if len(config.Others) > 0 {
 		if len(lines) > 0 {
 			lines = append(lines, "")
 		}
-		lines = append(lines, "# Other")
+		lines = append(lines, highlightSyntax("# Other"))
 		for _, other := range config.Others {
-			lines = append(lines, other)
+			lines = append(lines, highlightSyntax(other))
 		}
 	}
 
@@ -187,8 +225,8 @@ func formatFile(path string) error {
 
 	if confirm {
 		preview := formatted
-		if len(preview) > 500 {
-			preview = preview[:500] + "\n..."
+		if len(preview) > 1500 {
+			preview = preview[:1500] + "\n..."
 		}
 		fmt.Println(formatStyle.Render(fmt.Sprintf("Preview:\n\n%s", preview)))
 		huh.NewConfirm().

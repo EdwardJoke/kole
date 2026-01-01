@@ -77,7 +77,7 @@ func showMainMenu() string {
 	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewSelect[string]().
-				Title("Environment Variable Manager").
+				Title("Kole").
 				Options(
 					huh.NewOption("View All Environment Variables", "view_all"),
 					huh.NewOption("Manage PATH Variable", "manage_path"),
@@ -411,7 +411,7 @@ func main() {
 		case "format_shell":
 			runFormatter()
 		case "exit":
-			fmt.Println("\nGoodbye! Thanks for using Environment Variable Manager!")
+			fmt.Println("\nGoodbye! Thanks for using Kole!")
 			return
 		}
 	}
