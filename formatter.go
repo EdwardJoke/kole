@@ -125,55 +125,64 @@ func parseShellConfig(path string) (*ShellConfig, error) {
 	return config, scanner.Err()
 }
 
-func formatShellConfig(config *ShellConfig) string {
+func formatShellConfigPlain(config *ShellConfig) string {
 	var lines []string
 
-	lines = append(lines, highlightSyntax("# Comments"))
+	lines = append(lines, "# Comments")
 	for _, comment := range config.Comments {
-		lines = append(lines, highlightSyntax(comment))
+		lines = append(lines, comment)
 	}
 
 	if len(config.Comments) > 0 && (len(config.Exports) > 0 || len(config.Aliases) > 0 || len(config.Functions) > 0) {
 		lines = append(lines, "")
 	}
 
-	lines = append(lines, highlightSyntax("# Exports"))
+	lines = append(lines, "# Exports")
 	sort.Strings(config.Exports)
 	for _, exp := range config.Exports {
-		lines = append(lines, highlightSyntax(exp))
+		lines = append(lines, exp)
 	}
 
 	if len(config.Exports) > 0 && (len(config.Aliases) > 0 || len(config.Functions) > 0) {
 		lines = append(lines, "")
 	}
 
-	lines = append(lines, highlightSyntax("# Aliases"))
+	lines = append(lines, "# Aliases")
 	sort.Strings(config.Aliases)
 	for _, alias := range config.Aliases {
-		lines = append(lines, highlightSyntax(alias))
+		lines = append(lines, alias)
 	}
 
 	if len(config.Aliases) > 0 && len(config.Functions) > 0 {
 		lines = append(lines, "")
 	}
 
-	lines = append(lines, highlightSyntax("# Functions"))
+	lines = append(lines, "# Functions")
 	sort.Strings(config.Functions)
 	for _, fn := range config.Functions {
-		lines = append(lines, highlightSyntax(fn))
+		lines = append(lines, fn)
 	}
 
 	if len(config.Others) > 0 {
 		if len(lines) > 0 {
 			lines = append(lines, "")
 		}
-		lines = append(lines, highlightSyntax("# Other"))
+		lines = append(lines, "# Other")
 		for _, other := range config.Others {
-			lines = append(lines, highlightSyntax(other))
+			lines = append(lines, other)
 		}
 	}
 
 	return strings.Join(lines, "\n")
+}
+
+func highlightShellConfig(content string) string {
+	lines := strings.Split(content, "\n")
+	var highlighted []string
+	for _, line := range lines {
+		highlighted = append(highlighted, highlightSyntax(line))
+	}
+	return strings.Join(highlighted, "\n")
 }
 
 func writeFormattedConfig(path string, content string) error {
@@ -213,7 +222,7 @@ func formatFile(path string) error {
 		return fmt.Errorf("failed to parse file: %w", err)
 	}
 
-	formatted := formatShellConfig(config)
+	formatted := formatShellConfigPlain(config)
 
 	var confirm bool
 	huh.NewConfirm().
@@ -224,7 +233,8 @@ func formatFile(path string) error {
 		Run()
 
 	if confirm {
-		preview := formatted
+		highlighted := highlightShellConfig(formatted)
+		preview := highlighted
 		if len(preview) > 1500 {
 			preview = preview[:1500] + "\n..."
 		}
